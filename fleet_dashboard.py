@@ -59,20 +59,26 @@ try:
     # Load the existing dataset generated for the fleet
     df = pd.read_csv('vehicle_sensor_data.csv')
     
-    # Show a quick metrics overview
+    # Standardize column names to lowercase and strip spaces
+    df.columns = df.columns.str.lower().str.strip()
+    
+    # Safely find matching columns
+    temp_col = next((col for col in df.columns if 'temp' in col), df.columns[0])
+    vib_col = next((col for col in df.columns if 'vib' in col), df.columns[1])
+    
+    # Show metrics overview
     col_m1, col_m2, col_m3 = st.columns(3)
     col_m1.metric("Total Vehicles Monitored", len(df))
-    col_m2.metric("Avg Engine Temp", f"{df['engine_temp'].mean():.2f} °C")
-    col_m3.metric("Avg Vibration", f"{df['vibration'].mean():.2f} mm/s")
+    col_m2.metric("Avg Engine Temp", f"{df[temp_col].mean():.2f} °C")
+    col_m3.metric("Avg Vibration", f"{df[vib_col].mean():.2f} mm/s")
     
-    # Display customized charts
+    # Display charts
     st.markdown("**Engine Temperature & Vibration Trends across Fleet:**")
-    st.line_chart(df[['engine_temp', 'vibration']])
+    st.line_chart(df[[temp_col, vib_col]])
 
     # Downloadable CSV Report Feature
     st.markdown("### 📥 Export Fleet Analytics Report")
     
-    # Convert DataFrame to CSV string
     csv_report = df.to_csv(index=False).encode('utf-8')
     
     st.download_button(
@@ -84,4 +90,4 @@ try:
     )
 
 except Exception as e:
-    st.info("Sensor dataset not found. Make sure vehicle_sensor_data.csv is in your directory.")
+    st.error(f"Error loading analytics data: {e}")
