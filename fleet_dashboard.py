@@ -50,3 +50,38 @@ if st.sidebar.button("Predict Failure Risk"):
             st.success("✅ **Fleet Status Normal.** No immediate failure risk.")
     with col2:
         st.metric(label="Estimated Failure Probability", value=f"{probability*100:.2f}%")
+
+# Historical Fleet Sensor Trends & Reporting Section
+st.markdown("---")
+st.subheader("📊 Fleet Sensor Analytics & Historical Trends")
+
+try:
+    # Load the existing dataset generated for the fleet
+    df = pd.read_csv('vehicle_sensor_data.csv')
+    
+    # Show a quick metrics overview
+    col_m1, col_m2, col_m3 = st.columns(3)
+    col_m1.metric("Total Vehicles Monitored", len(df))
+    col_m2.metric("Avg Engine Temp", f"{df['engine_temp'].mean():.2f} °C")
+    col_m3.metric("Avg Vibration", f"{df['vibration'].mean():.2f} mm/s")
+    
+    # Display customized charts
+    st.markdown("**Engine Temperature & Vibration Trends across Fleet:**")
+    st.line_chart(df[['engine_temp', 'vibration']])
+
+    # Downloadable CSV Report Feature
+    st.markdown("### 📥 Export Fleet Analytics Report")
+    
+    # Convert DataFrame to CSV string
+    csv_report = df.to_csv(index=False).encode('utf-8')
+    
+    st.download_button(
+        label="Download Fleet Sensor CSV Report",
+        data=csv_report,
+        file_name="fleet_maintenance_report.csv",
+        mime="text/csv",
+        key="download-csv"
+    )
+
+except Exception as e:
+    st.info("Sensor dataset not found. Make sure vehicle_sensor_data.csv is in your directory.")
